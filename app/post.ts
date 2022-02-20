@@ -1,7 +1,8 @@
 import path from "path";
 import fs from "fs/promises";
-import parseFontMatter from "front-matter";
+import parseFrontMatter from "front-matter";
 import invariant from "tiny-invariant";
+import { marked } from "marked";
 
 export type Post = {
   slug: string;
@@ -11,6 +12,7 @@ export type Post = {
 export type PostMarkdownAttributes = {
   title: string;
 };
+
 // relative to the server not to the source!
 const postsPath = path.join(__dirname, "..", "posts");
 
@@ -25,7 +27,7 @@ export async function getPosts() {
   return Promise.all(
     dir.map(async (filename) => {
       const file = await fs.readFile(path.join(postsPath, filename));
-      const { attributes } = parseFontMatter(file.toString());
+      const { attributes } = parseFrontMatter(file.toString());
       invariant(
         isValidPostAttributes(attributes),
         `${filename}, has bad meta data!`
@@ -36,4 +38,16 @@ export async function getPosts() {
       };
     })
   );
+}
+
+export async function getPost(slug: string) {
+  const filepath = path.join(postsPath, slug + ".md");
+  const file = await fs.readFile(filepath);
+  const { attributes, body } = parseFrontMatter(file.toString());
+  invariant(
+    isValidPostAttributes(attributes),
+    `Post ${filepath} is missing attributes`
+  );
+  const html = marked(body);
+  return { slug, html, title: attributes.title };
 }
