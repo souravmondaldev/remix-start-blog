@@ -1,15 +1,13 @@
-import { Link, useLoaderData } from "remix";
+import React from 'react';
+import { Link, useLoaderData } from 'remix';
 
-import { getPosts } from "~/post";
-import type { Post } from "~/post";
+import { getPosts } from '../../post';
+import type { Post } from '~/post';
 
-export const loader = async () => {
-  return getPosts();
-};
+export const loader = async () => getPosts();
 
 export default function Posts() {
   const posts = useLoaderData<Post[]>();
-  console.log(posts);
   return (
     <div>
       <h1>Posts</h1>
